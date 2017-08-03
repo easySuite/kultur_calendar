@@ -1,0 +1,139 @@
+<?php
+/**
+ * @file
+ * Module hooks are defined here.
+ */
+module_load_include('inc', 'kultur_calendar', 'kultur_calendar.events');
+
+/**
+ * Implements hook_menu().
+ */
+function kultur_calendar_menu() {
+  $items = array();
+
+  $items['kalender'] = array(
+    'title' => 'KulturØen Calendar',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('kultur_calendar'),
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+  );
+  $items['kalender/events'] = array(
+    'title' => 'Retreives events for libraries',
+    'page callback' => 'kultur_calendar_events_get',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+    'delivery callback' => 'drupal_json_output',
+  );
+  $items['kalender/day'] = array(
+    'title' => 'Get data for one day',
+    'page callback' => 'kultur_calendar_events_day_load',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+    'delivery callback' => 'drupal_json_output',
+  );
+  return $items;
+}
+
+function kultur_calendar($form, &$form_state) {
+  $path = drupal_get_path('module', 'kultur_calendar');
+
+  $libraries = db_select('node', 'n')
+    ->fields('n', array('nid', 'title'))
+    ->condition('type', 'ding_library')
+    ->execute()->fetchAllKeyed();
+
+  $form['libraries'] = array(
+    '#type' => 'checkboxes',
+    '#options' => $libraries,
+    '#default_value' => array_keys($libraries),
+    '#suffix' => '
+      <div id="kultur_calendar"></div>
+        <div id="kultur_calendar-day" class="hidden">
+          <div class="kultur_calendar-title"></div>
+          <div class="kultur_calendar-body"></div>
+        </div>
+      ',
+    '#attached' => array(
+      'js' => array(
+        array(
+          'data' => 'http://code.jquery.com/jquery-1.11.3.min.js',
+          'type' => 'external',
+        ),
+        array(
+          'data' => 'https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js',
+          'type' => 'external',
+        ),
+        array(
+          'data' => 'https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.4.0/fullcalendar.min.js',
+          'type' => 'external',
+        ),
+        array(
+          'data' => $path . '/js/kultur_calendar.js'
+        ),
+        array(
+          'data' => array(
+            'events' => array(),
+          ),
+          'type' => 'setting'
+        ),
+      ),
+      'css' => array(
+        array(
+          'data' => 'https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.4.0/fullcalendar.css',
+          'type' => 'external',
+        ),
+        array('data' => $path . '/css/kultur_calendar.css'),
+      ),
+    ),
+  );
+
+  return $form;
+}
+
+/**
+ * Get events sum based for each library based on the period.
+ *
+ * @return array
+ *   Set of event numbers grouped by library.
+ */
+function kultur_calendar_events_get() {
+  $events = array();
+  if (!empty($_POST['start']) && !empty($_POST['end'])) {
+    $events = kultur_calendar_get_events($_POST['start'], $_POST['end']);
+  }
+
+  return $events;
+}
+
+/**
+ * Load single event for each library.
+ *
+ * This function is called on the popup display.
+ *
+ * @return array
+ *   Set of events in a given day.
+ */
+function kultur_calendar_events_day_load() {
+  $events = array();
+  if (!empty($_POST['date'])) {
+    $date = date('l d.m.Y', strtotime($_POST['date']));
+    $events[$date] = kultur_calendar_get_day_libraries_events($_POST['date']);
+
+    foreach ($events[$date] as &$event) {
+      $day = kultur_calendar_get_day_events($_POST['date'], $event->lid);
+
+      if (strtotime($day->start) == strtotime($day->end)) {
+        $day->start = t('All day');
+        $day->end = '';
+      } else {
+        $day->start = date("H:i",strtotime($day->start));
+        $day->end = date("H:i",strtotime($day->end));
+      }
+
+      $event->info = $day;
+    }
+  }
+
+  return $events;
+}
