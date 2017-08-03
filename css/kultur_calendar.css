@@ -1,0 +1,14 @@
+#kultur_calendar {
+  background-color: #fff;
+}
+#kultur_calendar-day {
+  position: absolute;
+  width: 340px;
+  background-color: white;
+  float: left;
+  z-index: 100;
+}
+
+#kultur_calendar-day.hidden {
+  display: none;
+}
