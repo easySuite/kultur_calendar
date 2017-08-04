@@ -2,5 +2,4 @@ name = KulturØen Calendar
 description = Provide a page with calendar view.
 core = 7.x
 package = KulturØen
-
-features[features_api][] = api:2
+dependencies[] = domain

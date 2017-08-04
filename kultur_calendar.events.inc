@@ -19,6 +19,7 @@
 function kultur_calendar_get_events($start, $end) {
   $daily_events = array();
 
+  // TODO: Request a task to make a single request and avoid loop.
   $date = $start;
   while ($date <= $end) {
     $date = date('Y-m-d', strtotime('+1 day', $date));
@@ -49,7 +50,7 @@ function kultur_calendar_get_day_libraries_events($date) {
   $query->addExpression('COUNT(event.nid)', 'amount');
   $query->condition('library.type', 'ding_library')
         ->condition('event.status', 1)
-        ->where('DATE(event_date.field_ding_event_date_value) = :date', array('date' => $date));
+        ->where('DATE(CONVERT_TZ(field_ding_event_date_value, \'+00:00\', \'+02:00\')) = :date', array('date' => $date));
   $query->groupBy('library.title');
   $result = $query->execute()->fetchAll();
 

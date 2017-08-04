@@ -15,7 +15,7 @@ function kultur_calendar_menu() {
     'title' => 'KulturØen Calendar',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('kultur_calendar'),
-    'access arguments' => array('access content'),
+    'access callback' => array('kultur_access_calendar'),
     'type' => MENU_CALLBACK,
   );
   $items['kalender/events'] = array(
@@ -35,6 +35,27 @@ function kultur_calendar_menu() {
   return $items;
 }
 
+/**
+ * Access callback based on the domain.
+ *
+ * @return bool
+ *   Access permission.
+ */
+function kultur_access_calendar() {
+  global $_domain;
+  if (strpos($_domain['subdomain'], 'kultur') !== FALSE) {
+    return TRUE;
+  }
+
+  return FALSE;
+}
+
+/**
+ * Render Full page calendar.
+ *
+ * @return array
+ *   Form elements.
+ */
 function kultur_calendar($form, &$form_state) {
   $path = drupal_get_path('module', 'kultur_calendar');
 
