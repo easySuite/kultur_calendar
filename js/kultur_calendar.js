@@ -94,7 +94,7 @@
       });
 
       // Show/Hide events based on the selected library.
-      $('#kultur-calendar', context).on('change', 'input:checkbox', function() {
+      $('#kultur-libraries', context).on('change', 'input:checkbox', function() {
         let lid = $(this).val();
         $(`a.fc-day-grid-event[data-lid='${lid}']`).parent().toggleClass('hidden');
       });

@@ -68,6 +68,7 @@ function kultur_calendar($form, &$form_state) {
     '#type' => 'checkboxes',
     '#options' => $libraries,
     '#default_value' => array_keys($libraries),
+    '#id' => drupal_html_id('kultur-libraries'),
     '#suffix' => '
       <div id="kultur_calendar"></div>
         <div id="kultur_calendar-day" class="hidden">

@@ -1,6 +1,9 @@
 #kultur_calendar {
   background-color: #fff;
 }
+.fc-event-container.hidden {
+  visibility: hidden;
+}
 #kultur_calendar-day {
   position: absolute;
   width: 340px;
