@@ -35,7 +35,7 @@
                   events.push(day);
                 }
                 // Add other link for pop-up.
-                if (doc[date] > 0) {
+                if (doc[date].length > 0) {
                   events.push({
                     start: date,
                     title: Drupal.t('See other'),
@@ -107,6 +107,9 @@
       $('#kultur-calendar').on('click', '#kultur_calendar-day', function() {
         $(this).toggleClass('hidden');
       });
+
+      // Move checkboxes in the calendar.
+      $('#kultur-libraries').insertAfter(' #kultur_calendar .fc-toolbar');
 
       // Manipulate Day Popup on the calendar view.
       function positionDayPopup(event) {
