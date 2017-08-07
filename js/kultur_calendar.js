@@ -10,6 +10,9 @@
           right: ''
         },
         firstDay: 1,
+        showNonCurrentDates: false,
+        fixedWeekCount: false,
+        columnFormat: 'dddd',
         events: function (start, end, timezone, callback) {
           $.ajax({
             url: `/kalender/events`,
@@ -32,12 +35,14 @@
                   events.push(day);
                 }
                 // Add other link for pop-up.
-                events.push({
-                  start: date,
-                  title: Drupal.t('See other'),
-                  url: '/day',
-                  date: date
-                });
+                if (doc[date] > 0) {
+                  events.push({
+                    start: date,
+                    title: Drupal.t('See other'),
+                    url: '/day',
+                    date: date
+                  });
+                }
               });
 
               callback(events);
@@ -134,4 +139,13 @@
       }
     }
   };
+
+  function updateLibrariesCalendar() {
+    var librariesCalendar = $('#kultur-libraries');
+    (librariesCalendar).insertAfter(' #kultur_calendar .fc-toolbar');
+  }
+
+  $(document).ready(function() {
+    updateLibrariesCalendar();
+  });
 } (jQuery));

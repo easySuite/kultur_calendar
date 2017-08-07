@@ -1,5 +1,6 @@
 #kultur_calendar {
   background-color: #fff;
+  padding-top: 20px;
 }
 .fc-event-container.hidden {
   visibility: hidden;
@@ -14,4 +15,15 @@
 
 #kultur_calendar-day.hidden {
   display: none;
+}
+
+#kultur-libraries .form-item {
+  display: inline-block;
+  padding-left: 10px;
+}
+
+#kultur-libraries {
+  width: 800px;
+  text-align: center;
+  margin: 0 auto;
 }
