@@ -134,4 +134,13 @@
       }
     }
   };
+
+  function updateLibrariesCalendar() {
+    var librariesCalendar = $('#kultur-libraries');
+    (librariesCalendar).insertAfter(' #kultur_calendar .fc-toolbar');
+  }
+
+  $(document).ready(function() {
+    updateLibrariesCalendar();
+  });
 } (jQuery));
