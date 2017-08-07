@@ -35,7 +35,7 @@
                   events.push(day);
                 }
                 // Add other link for pop-up.
-                if (doc[date] > 0) {
+                if (doc[date].length > 0) {
                   events.push({
                     start: date,
                     title: Drupal.t('See other'),
