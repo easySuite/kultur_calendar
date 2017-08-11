@@ -23,15 +23,26 @@
               end: end.unix(),
             },
             success: function (doc) {
+
               let events = [];
               Object.keys(doc).forEach(function (date) {
                 for (let value of doc[date]) {
+
+                  // Cut title bibliotec in the calendar.
+                  let cutTitleLength = value.title.indexOf('-') !== -1 ?
+                      value.title.indexOf('-') :
+                      value.title.length;
+
+                  let shortTitle = value.title.substr(0, cutTitleLength);
+
                   let day = {
-                    title: value.amount + ' ' + value.title,
+                    title: value.amount + ' ' + shortTitle,
                     url: `/node/${value.lid}`,
                     start: date,
                     lid: value.lid,
                   };
+                  // ----- end custom code
+
                   events.push(day);
                 }
                 // Add other link for pop-up.
@@ -52,6 +63,22 @@
         eventRender: function (event, element) {
           element.addClass('kultur-event');
           element.attr('data-lid', event.lid);
+
+          let today = new Date().getDate();
+          let eventDay = event.start.date();
+          if (today < eventDay) {
+            element.addClass('kultur-future-event');
+          }
+          else if (today === eventDay) {
+            element.addClass('kultur-today-event');
+          }
+          else {
+            element.addClass('kultur-past-event');
+          }
+
+          if (!event.lid) {
+            element.addClass('other-info');
+          }
         },
         // Open pop-up on event click.
         eventClick: function (event, jsEvent, view) {
@@ -111,23 +138,40 @@
       // Move checkboxes in the calendar.
       $('#kultur-libraries').insertAfter(' #kultur_calendar .fc-toolbar');
 
+      function getAditionalCorrections() {
+        let result = {
+          top: 0,
+          left: 0
+        };
+
+        const parentPosition = $('.panel-pane.pane-page-content').css('position');
+        if (!parentPosition || parentPosition === 'static' || parentPosition === 'inherit')  {
+          return result;
+        }
+        return $('.panel-pane.pane-page-content').offset();
+      }
+
       // Manipulate Day Popup on the calendar view.
       function positionDayPopup(event) {
         let day = $(".fc-bg").find(`td[data-date='${event.date}']`)[0];
-        let left = ($(day).offset().left > $(day).width()) ? $(day).offset().left - $(day).width() : $(day).offset().left;
         let row = $(day).closest('.fc-row.fc-widget-content')[0];
         let nextRow = $(row).next()[0];
         let height = $(row).height();
+        let aditionalCorrections = getAditionalCorrections();
+
         let top = 0;
+        let left = ($(day).offset().left > $(day).width()) ?
+          $(day).offset().left - $(day).width() - aditionalCorrections.left :
+          $(day).offset().left - aditionalCorrections.left;
 
         if (nextRow) {
           height += $(nextRow).height();
-          top = $(nextRow).offset().top - $(row).height();
+          top = $(nextRow).offset().top - $(row).height() - aditionalCorrections.top;
         } else {
           let prevRow = $(row).prev()[0];
           height += $(prevRow).height();
 
-          top = $(prevRow).offset().top;
+          top = $(prevRow).offset().top - aditionalCorrections.top;
         }
         $('#kultur_calendar-day').css(
           {
@@ -142,4 +186,5 @@
       }
     }
   };
+
 } (jQuery));
