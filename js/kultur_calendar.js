@@ -161,7 +161,7 @@
         let aditionalCorrections = getAditionalCorrections();
 
         let top = 0;
-        let left = ($(day).offset().left > $(day).width()) ?
+        let left = ($(day).offset().left - aditionalCorrections.left > $(day).width()) ?
           $(day).offset().left - $(day).width() - aditionalCorrections.left :
           $(day).offset().left - aditionalCorrections.left;
 
