@@ -23,26 +23,16 @@
               end: end.unix(),
             },
             success: function (doc) {
-
               let events = [];
               Object.keys(doc).forEach(function (date) {
                 for (let value of doc[date]) {
-
-                  // Cut title bibliotec in the calendar.
-                  let cutTitleLength = value.title.indexOf('-') !== -1 ?
-                      value.title.indexOf('-') :
-                      value.title.length;
-
-                  let shortTitle = value.title.substr(0, cutTitleLength);
-
                   let day = {
-                    title: value.amount + ' ' + shortTitle,
+                    title: value.title,
                     url: `/node/${value.lid}`,
                     start: date,
                     lid: value.lid,
+                    amount: value.amount,
                   };
-                  // ----- end custom code
-
                   events.push(day);
                 }
                 // Add other link for pop-up.
@@ -60,7 +50,18 @@
             }
           });
         },
-        eventRender: function (event, element) {
+        eventRender: function (event, element, view) {
+          if (view.name === 'month' && event.lid) {
+            // Process title before render.
+            let amount = `<span class="event-amount">${event.amount}</span>`;
+            // Trim title.
+            let cutTitleLength = event.title.indexOf('-') !== -1 ?
+              event.title.indexOf('-') :
+              event.title.length;
+            let title = amount + event.title.substr(0, cutTitleLength);
+            element.find('span.fc-title').html(title);
+          }
+
           element.addClass('kultur-event');
           element.attr('data-lid', event.lid);
 
