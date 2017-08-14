@@ -94,7 +94,14 @@
                 date: event.date
               },
               success: function (data) {
-                let body = `<div class="kultur_calendar-body">
+                let $day = $('#kultur_calendar-day');
+                let date = new Date(this.data.split('=')[1]);
+                let body = `
+                  <div class="kultur_calendar-title">
+                    ${Object.keys(data)[0]}
+                    <div class="day-number">${date.getDate()}</div>
+                  </div>
+                  <div class="kultur_calendar-body">
                   ${data[Object.keys(data)[0]].map(event =>
                     `<div class="row">
                       <div class="amount">${event.amount}</div>
@@ -107,17 +114,9 @@
                       </div>
                     </div>`
                   ).join('')}
-                </div>`;
+                  </div>`;
 
-                let $day = $('#kultur_calendar-day');
-                let date = new Date(this.data.split('=')[1]);
-                $day.find('.kultur_calendar-title').replaceWith(`
-                    <div class="kultur_calendar-title">
-                      ${Object.keys(data)[0]}
-                      <div class="day-number">${date.getDate()}</div>
-                    </div>
-                  `);
-                $day.find('.kultur_calendar-body').replaceWith(body);
+                $day.find('.loading').replaceWith(body);
               }
             });
 
@@ -149,6 +148,7 @@
         if (!parentPosition || parentPosition === 'static' || parentPosition === 'inherit')  {
           return result;
         }
+
         return $('.panel-pane.pane-page-content').offset();
       }
 
@@ -182,6 +182,17 @@
           }
         ).removeClass('hidden');
 
+        $('#kultur_calendar-day').html(
+          `<div class="loading">
+            <div class="f_circleG" id="frotateG_01"></div>
+            <div class="f_circleG" id="frotateG_02"></div>
+            <div class="f_circleG" id="frotateG_03"></div>
+            <div class="f_circleG" id="frotateG_04"></div>
+            <div class="f_circleG" id="frotateG_05"></div>
+            <div class="f_circleG" id="frotateG_06"></div>
+            <div class="f_circleG" id="frotateG_07"></div>
+            <div class="f_circleG" id="frotateG_08"></div>
+          </div>`);
         // Prevent redirect.
         return false;
       }

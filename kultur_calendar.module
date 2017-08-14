@@ -71,10 +71,7 @@ function kultur_calendar($form, &$form_state) {
     '#id' => drupal_html_id('kultur-libraries'),
     '#suffix' => '
       <div id="kultur_calendar"></div>
-        <div id="kultur_calendar-day" class="hidden">
-          <div class="kultur_calendar-title"></div>
-          <div class="kultur_calendar-body"></div>
-        </div>
+        <div id="kultur_calendar-day" class="hidden"></div>
       ',
     '#attached' => array(
       'js' => array(
