@@ -4,6 +4,7 @@
   Drupal.behaviors.kultur_calendar = {
     attach: function (context) {
       $('#kultur_calendar').fullCalendar({
+        locale: $('html').attr('lang'),
         header: {
           left: '',
           center: 'prev title next',

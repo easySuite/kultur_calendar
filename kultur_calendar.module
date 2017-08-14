@@ -88,6 +88,10 @@ function kultur_calendar($form, &$form_state) {
           'type' => 'external',
         ),
         array(
+          'data' => 'https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.4.0/locale-all.js',
+          'type' => 'external',
+        ),
+        array(
           'data' => $path . '/js/kultur_calendar.js'
         ),
         array(
