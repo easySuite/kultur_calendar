@@ -52,6 +52,9 @@
         },
         eventRender: function (event, element, view) {
           if (view.name === 'month' && event.lid) {
+            // Hide all items before render.
+            element.addClass('hidden');
+
             // Process title before render.
             let amount = `<span class="event-amount">${event.amount}</span>`;
             // Trim title.
@@ -63,6 +66,9 @@
           }
 
           element.addClass('kultur-event');
+          if ($('#kultur-libraries').find('input[type=checkbox][value=' + event.lid + ']').is(':checked')) {
+            element.removeClass('hidden');
+          }
           element.attr('data-lid', event.lid);
 
           let today = new Date().getDate();
@@ -128,7 +134,7 @@
       // Show/Hide events based on the selected library.
       $('#kultur-libraries', context).on('change', 'input:checkbox', function() {
         let lid = $(this).val();
-        $(`a.fc-day-grid-event[data-lid='${lid}']`).parent().toggleClass('hidden');
+        $(`a.fc-day-grid-event[data-lid='${lid}']`).toggleClass('hidden');
       });
 
       $('#kultur-calendar').on('click', '#kultur_calendar-day', function() {

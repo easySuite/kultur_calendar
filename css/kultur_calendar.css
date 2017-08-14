@@ -2,7 +2,7 @@
   background-color: #fff;
   padding-top: 20px;
 }
-.fc-event-container.hidden {
+.kultur-event.hidden {
   visibility: hidden;
 }
 #kultur_calendar-day {
