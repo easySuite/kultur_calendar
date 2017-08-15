@@ -41,7 +41,7 @@
                   events.push({
                     start: date,
                     title: Drupal.t('See other'),
-                    url: '/day',
+                    url: `/arrangementer-liste/${date}`,
                     date: date
                   });
                 }
@@ -88,21 +88,21 @@
             element.addClass('other-info');
           }
         },
-        // Open pop-up on event click.
-        eventClick: function (event, jsEvent, view) {
-          if (event.url && event.date) {
-            positionDayPopup(event);
-
-            $.ajax({
-              url: '/kalender/day',
-              dataType: 'json',
-              type: 'POST',
-              data: {
-                date: event.date
-              },
-              success: function (data) {
+        // Open pop-up on day click.
+        dayClick: function (date, jsEvent, view) {
+          $.ajax({
+            url: '/kalender/day',
+            dataType: 'json',
+            type: 'POST',
+            data: {
+              date: date.format()
+            },
+            success: function (data) {
+                if (data[Object.keys(data)[0]].length > 0) {
                 let $day = $('#kultur_calendar-day');
                 let date = new Date(this.data.split('=')[1]);
+                positionDayPopup(data[Object.keys(data)[0]][0].date);
+
                 let body = `
                   <div class="kultur_calendar-title">
                     ${Object.keys(data)[0]}
@@ -110,7 +110,7 @@
                   </div>
                   <div class="kultur_calendar-body">
                   ${data[Object.keys(data)[0]].map(event =>
-                    `<div class="row">
+                  `<div class="row">
                       <div class="amount">${event.amount}</div>
                       <div class="title">${event.title}:</div>
                       <div class="event">
@@ -120,15 +120,15 @@
                         </div>
                       </div>
                     </div>`
-                  ).join('')}
+                ).join('')}
                   </div>`;
-
                 $day.find('.loading').replaceWith(body);
-              }
-            });
 
-            return false;
-          }
+              }
+            }
+          });
+
+          return false;
         }
       });
 
@@ -160,8 +160,8 @@
       }
 
       // Manipulate Day Popup on the calendar view.
-      function positionDayPopup(event) {
-        let day = $(".fc-bg").find(`td[data-date='${event.date}']`)[0];
+      function positionDayPopup(date) {
+        let day = $(".fc-bg").find(`td[data-date='${date}']`)[0];
         let row = $(day).closest('.fc-row.fc-widget-content')[0];
         let nextRow = $(row).next()[0];
         let height = $(row).height();

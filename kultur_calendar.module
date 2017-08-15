@@ -155,6 +155,7 @@ function kultur_calendar_events_day_load() {
       }
 
       $event->info = $day;
+      $event->date = $_POST['date'];
     }
   }
 
