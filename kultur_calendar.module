@@ -147,13 +147,7 @@ function kultur_calendar_events_day_load() {
     foreach ($events[$date] as &$event) {
       $day = kultur_calendar_get_day_events($_POST['date'], $event->lid);
 
-      if (strtotime($day->start) == strtotime($day->end)) {
-        $day->start = t('All day');
-        $day->end = '';
-      } else {
-        $day->start = date("H:i",strtotime($day->start));
-        $day->end = date("H:i",strtotime($day->end));
-      }
+      _kultur_calendar_format_event_time($day);
 
       $event->info = $day;
       $event->date = $_POST['date'];
@@ -161,4 +155,32 @@ function kultur_calendar_events_day_load() {
   }
 
   return $events;
+}
+
+/**
+ * Proper format of the event date.
+ */
+function _kultur_calendar_format_event_time(&$day) {
+  $timezone = date_default_timezone_get();
+  $raw_start = new DateTime($day->start, new DateTimeZone($timezone));
+  $raw_start = $raw_start->getTimestamp();
+
+  $raw_end = new DateTime($day->end, new DateTimeZone($timezone));
+  $raw_end = $raw_end->getTimestamp();
+
+  $start = format_date($raw_start, 'kultur_time');
+  $end = format_date($raw_end, 'kultur_time');
+
+  if ($start == "0:00") {
+    $day->start = t('All day');
+    $day->end = '';
+  }
+  elseif ($raw_start != $raw_end) {
+    $day->start = $start;
+    $day->end = $end;
+  }
+  else {
+    $day->start = $start;
+    $day->end = '';
+  }
 }

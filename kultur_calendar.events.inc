@@ -103,11 +103,11 @@ function kultur_calendar_get_day_events($date, $lid) {
   $query->leftJoin('og_membership', 'og', 'events.nid = og.etid');
   $query->addField('events', 'title', 'title');
   $query->addField('events', 'nid', 'eid');
-  $query->addField('events_date', 'field_ding_event_date_value', 'start');
-  $query->addField('events_date', 'field_ding_event_date_value2', 'end');
+  $query->addExpression('CONVERT_TZ(events_date.field_ding_event_date_value, \'+00:00\', \'+02:00\')', 'start');
+  $query->addExpression('CONVERT_TZ(events_date.field_ding_event_date_value2, \'+00:00\', \'+02:00\')', 'end');
   $query->condition('events.type', 'ding_event')
         ->condition('og.gid', $lid)
-        ->where('DATE(events_date.field_ding_event_date_value) = :date', array('date' => $date));
+        ->where('DATE(CONVERT_TZ(events_date.field_ding_event_date_value, \'+00:00\', \'+02:00\')) = :date', array('date' => $date));
   $query->range(0, 1);
   $result = $query->execute()->fetchAll();
 
