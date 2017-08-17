@@ -15,7 +15,7 @@ function kultur_calendar_menu_default_menu_links() {
     'menu_name' => 'main-menu',
     'link_path' => 'kalender',
     'router_path' => 'kalender',
-    'link_title' => 'Calendar',
+    'link_title' => 'Kalender',
     'options' => array(
       'domain_menu_access' => array(
         'show' => array(
@@ -38,7 +38,7 @@ function kultur_calendar_menu_default_menu_links() {
   );
   // Translatables
   // Included for use with string extractors like potx.
-  t('Calendar');
+  t('Kalender');
 
 
   return $menu_links;

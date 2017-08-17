@@ -72,8 +72,8 @@
           }
           element.attr('data-lid', event.lid);
 
-          let today = new Date().getDate();
-          let eventDay = event.start.date();
+          let today = new Date().getTime() / 1000;
+          let eventDay = event.start.unix();
           if (today < eventDay) {
             element.addClass('kultur-future-event');
           }
