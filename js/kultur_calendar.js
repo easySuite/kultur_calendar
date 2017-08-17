@@ -72,16 +72,16 @@
           }
           element.attr('data-lid', event.lid);
 
-          let today = new Date().getTime() / 1000;
+          let today = new Date().setUTCHours(0, 0, 0, 0) / 1000;
           let eventDay = event.start.unix();
           if (today < eventDay) {
             element.addClass('kultur-future-event');
           }
-          else if (today === eventDay) {
-            element.addClass('kultur-today-event');
+          else if (today > eventDay) {
+            element.addClass('kultur-past-event');
           }
           else {
-            element.addClass('kultur-past-event');
+            element.addClass('kultur-today-event');
           }
 
           if (!event.lid) {

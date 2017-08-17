@@ -19,11 +19,13 @@
 function kultur_calendar_get_events($start, $end) {
   $daily_events = array();
 
+  $did = kultur_calendar_get_domain_id();
+
   // TODO: Request a task to make a single request and avoid loop.
   $date = $start;
   while ($date <= $end) {
     $date = date('Y-m-d', strtotime('+1 day', $date));
-    $daily_events[$date] = kultur_calendar_get_day_libraries_events($date);
+    $daily_events[$date] = kultur_calendar_get_day_libraries_events($date, $did);
     $date = strtotime($date);
   }
 
@@ -31,15 +33,36 @@ function kultur_calendar_get_events($start, $end) {
 }
 
   /**
+   * Get kultur domain id.
+   */
+function kultur_calendar_get_domain_id() {
+  $did = &drupal_static(__FUNCTION__);
+  if (empty($did)) {
+    $domains = domain_domains();
+    $did = FALSE;
+    foreach ($domains as $domain) {
+      if (strpos($domain['machine_name'], 'kultur') !== FALSE) {
+        $did = $domain['domain_id'];
+      }
+    }
+  }
+
+  return $did;
+}
+
+
+  /**
    * Call to database to get grouped event amounts by library.
    *
    * @param string $date
-   *   Date of the event
+   *   Date of the event.
+   * @param int $did
+   *  Domain grant access id.
    *
    * @return array
    *   Set that contains all the results.
    */
-function kultur_calendar_get_day_libraries_events($date) {
+function kultur_calendar_get_day_libraries_events($date, $did) {
   $query = db_select('node', 'library');
   $query->leftJoin('og_membership','og', 'library.nid = og.gid AND og.entity_type = \'node\'');
   $query->leftJoin('node','event', 'event.type = \'ding_event\' AND og.etid = event.nid');
@@ -52,6 +75,12 @@ function kultur_calendar_get_day_libraries_events($date) {
         ->condition('event.status', 1)
         ->where('DATE(CONVERT_TZ(field_ding_event_date_value, \'+00:00\', \'+02:00\')) = :date', array('date' => $date));
   $query->groupBy('library.title');
+
+  if ($did) {
+    $query->leftJoin('domain_access', 'da','event.nid = da.nid');
+    $query->condition('da.gid', $did);
+  }
+
   $result = $query->execute()->fetchAll();
 
   return $result;
