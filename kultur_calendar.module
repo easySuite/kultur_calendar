@@ -1,8 +1,11 @@
 <?php
+
 /**
  * @file
- * Module hooks are defined here.
+ * Code for the KulturØen Calendar feature.
  */
+
+include_once 'kultur_calendar.features.inc';
 module_load_include('inc', 'kultur_calendar', 'kultur_calendar.events');
 
 /**

@@ -114,7 +114,7 @@
                       <div class="amount">${event.amount}</div>
                       <div class="title">${event.title}:</div>
                       <div class="event">
-                        <a href="/node/${event.info.eid}">${event.info.title}</a>
+                        <a href="/node/${event.info.eid}">${trimAndShorten(event.info.title)}</a>
                         <div class="time">
                           ${[event.info.start, event.info.end].filter(function(value) {return value;}).join(' - ')}
                         </div>
@@ -157,6 +157,17 @@
         }
 
         return $('.panel-pane.pane-page-content').offset();
+      }
+
+      // Manipulate the length of event title in case it is very long and breaks
+      // layout.
+      function trimAndShorten(string) {
+        if (string.length >= 60) {
+          return string.substr(0, 60) + "...";
+        }
+        else {
+          return string;
+        }
       }
 
       // Manipulate Day Popup on the calendar view.
@@ -205,5 +216,4 @@
       }
     }
   };
-
 } (jQuery));
