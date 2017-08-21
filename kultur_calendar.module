@@ -59,10 +59,16 @@ function kultur_access_calendar() {
 function kultur_calendar($form, &$form_state) {
   $path = drupal_get_path('module', 'kultur_calendar');
 
-  $libraries = db_select('node', 'n')
-    ->fields('n', array('nid', 'title'))
-    ->condition('type', 'ding_library')
-    ->execute()->fetchAllKeyed();
+  $did = kultur_calendar_get_domain_id();
+
+  $query = db_select('node', 'n');
+  $query->join('domain_access', 'da', 'n.nid = da.nid');
+  $query->fields('n', array('nid', 'title'));
+  $query->condition('n.type', 'ding_library');
+  $query->condition('n.status', '1');
+  $query->condition('da.gid', $did);
+  $query->condition('da.realm', 'domain_id');
+  $libraries = $query->execute()->fetchAllKeyed();
 
   $form['libraries'] = array(
     '#type' => 'checkboxes',
