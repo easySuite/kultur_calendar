@@ -148,10 +148,11 @@ function kultur_calendar_events_day_load() {
   if (!empty($_POST['date'])) {
     $date = date('l d.m.Y', strtotime($_POST['date']));
     $did = kultur_calendar_get_domain_id();
-    $events[$date] = kultur_calendar_get_day_libraries_events($_POST['date'], $did);
+    $timezone = date_default_timezone_get();
 
+    $events[$date] = kultur_calendar_get_day_libraries_events($_POST['date'], $did, $timezone);
     foreach ($events[$date] as &$event) {
-      $day = kultur_calendar_get_day_events($_POST['date'], $event->lid);
+      $day = kultur_calendar_get_day_events($_POST['date'], $event->lid, $timezone);
 
       _kultur_calendar_format_event_time($day);
 
