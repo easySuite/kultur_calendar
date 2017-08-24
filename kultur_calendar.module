@@ -151,7 +151,7 @@ function kultur_calendar_events_day_load() {
   if (!empty($_POST['date'])) {
     $date = date_create_from_format('Y-m-d', $_POST['date']);
     $date = $date->getTimestamp();
-    $date = format_date($date, 'kulturoen_day_heading');
+    $date = format_date($date, 'ding_event_lists_date');
 
     $did = kultur_calendar_get_domain_id();
     $timezone = date_default_timezone_get();
