@@ -15,10 +15,10 @@ function kultur_calendar_install() {
  * Implements hook_uninstall().
  */
 function kultur_calendar_uninstall() {
-  $queues = array(
+  $queues = [
     'kultur_libraries' => 'KulturØen Libraries',
     'other_kultur_libraries' => 'Other actors',
-  );
+  ];
 
   foreach ($queues as $name => $title) {
     $queue = nodequeue_load_queue_by_name($name);
@@ -37,10 +37,10 @@ function kultur_calendar_update_7001() {
  * Create nodequeues to group libraries.
  */
 function kultur_calendar_create_nodequeues() {
-  $queues = array(
+  $queues = [
     'kultur_libraries' => 'KulturØen Libraries',
     'other_kultur_libraries' => 'Other actors',
-  );
+  ];
 
   $nodequeue = new stdClass();
   $nodequeue->subqueue_title = '';
@@ -52,20 +52,20 @@ function kultur_calendar_create_nodequeues() {
   $nodequeue->show_in_tab = TRUE;
   $nodequeue->show_in_links = FALSE;
   $nodequeue->i18n = 0;
-  $nodequeue->roles = array();
+  $nodequeue->roles = [];
   $nodequeue->size = 0;
   $nodequeue->reverse = 0;
   $nodequeue->new = TRUE;
-  $nodequeue->types = array(
+  $nodequeue->types = [
     0 => 'ding_library',
-  );
-  $nodequeue->subqueues = array();
+  ];
+  $nodequeue->subqueues = [];
   $nodequeue->submit = 'Submit';
   $nodequeue->reverse = 0;
   $nodequeue->reference = 0;
-  $nodequeue->add_subqueue = array(
+  $nodequeue->add_subqueue = [
     $nodequeue->title,
-  );
+  ];
 
   foreach ($queues as $name => $title) {
     $nodequeue->name = $name;

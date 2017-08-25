@@ -12,29 +12,29 @@ module_load_include('inc', 'kultur_calendar', 'kultur_calendar.events');
  * Implements hook_menu().
  */
 function kultur_calendar_menu() {
-  $items = array();
+  $items = [];
 
-  $items['kalender'] = array(
+  $items['kalender'] = [
     'title' => 'KulturØen Calendar',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('kultur_calendar'),
-    'access callback' => array('kultur_access_calendar'),
+    'page arguments' => ['kultur_calendar'],
+    'access callback' => ['kultur_access_calendar'],
     'type' => MENU_CALLBACK,
-  );
-  $items['kalender/events'] = array(
+  ];
+  $items['kalender/events'] = [
     'title' => 'Retreives events for libraries',
     'page callback' => 'kultur_calendar_events_get',
-    'access arguments' => array('access content'),
+    'access arguments' => ['access content'],
     'type' => MENU_CALLBACK,
     'delivery callback' => 'drupal_json_output',
-  );
-  $items['kalender/day'] = array(
+  ];
+  $items['kalender/day'] = [
     'title' => 'Get data for one day',
     'page callback' => 'kultur_calendar_events_day_load',
-    'access arguments' => array('access content'),
+    'access arguments' => ['access content'],
     'type' => MENU_CALLBACK,
     'delivery callback' => 'drupal_json_output',
-  );
+  ];
   return $items;
 }
 
@@ -70,14 +70,14 @@ function kultur_calendar($form, &$form_state) {
   $libraries = _kultur_calendar_get_libraries($libraries_sub_queue);
 
   $query = db_select('node', 'n');
-  $query->fields('n', array('nid', 'title'));
+  $query->fields('n', ['nid', 'title']);
   $query->condition('n.type', 'ding_library');
   $query->condition('n.status', '1');
   $query->condition('n.nid', $libraries, 'IN');
   $libraries = $query->execute()->fetchAllKeyed();
   $libraries['other'] = t('Other');
 
-  $form['libraries'] = array(
+  $form['libraries'] = [
     '#type' => 'checkboxes',
     '#options' => $libraries,
     '#default_value' => array_keys($libraries),
@@ -86,43 +86,43 @@ function kultur_calendar($form, &$form_state) {
       <div id="kultur_calendar"></div>
         <div id="kultur_calendar-day" class="hidden"></div>
       ',
-    '#attached' => array(
-      'js' => array(
-        array(
+    '#attached' => [
+      'js' => [
+        [
           'data' => 'http://code.jquery.com/jquery-1.11.3.min.js',
           'type' => 'external',
-        ),
-        array(
+        ],
+        [
           'data' => 'https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js',
           'type' => 'external',
-        ),
-        array(
+        ],
+        [
           'data' => 'https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.4.0/fullcalendar.min.js',
           'type' => 'external',
-        ),
-        array(
+        ],
+        [
           'data' => 'https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.4.0/locale-all.js',
           'type' => 'external',
-        ),
-        array(
-          'data' => $path . '/js/kultur_calendar.js'
-        ),
-        array(
-          'data' => array(
-            'events' => array(),
-          ),
-          'type' => 'setting'
-        ),
-      ),
-      'css' => array(
-        array(
+        ],
+        [
+          'data' => $path . '/js/kultur_calendar.js',
+        ],
+        [
+          'data' => [
+            'events' => [],
+          ],
+          'type' => 'setting',
+        ],
+      ],
+      'css' => [
+        [
           'data' => 'https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.4.0/fullcalendar.css',
           'type' => 'external',
-        ),
-        array('data' => $path . '/css/kultur_calendar.css'),
-      ),
-    ),
-  );
+        ],
+        ['data' => $path . '/css/kultur_calendar.css'],
+      ],
+    ],
+  ];
 
   return $form;
 }
@@ -134,7 +134,7 @@ function kultur_calendar($form, &$form_state) {
  *   Set of event numbers grouped by library.
  */
 function kultur_calendar_events_get() {
-  $events = array();
+  $events = [];
   $start = $_GET['start'];
   $end = $_GET['end'];
   if (!empty($start) && !empty($end)) {
@@ -153,7 +153,7 @@ function kultur_calendar_events_get() {
  *   Set of events in a given day.
  */
 function kultur_calendar_events_day_load() {
-  $events = array();
+  $events = [];
   if (!empty($_GET['date'])) {
     $date = date_create_from_format('Y-m-d', $_GET['date']);
     $date = $date->getTimestamp();
@@ -172,7 +172,7 @@ function kultur_calendar_events_day_load() {
     $other_sub_queue = nodequeue_load_subqueues_by_queue($other_queue->qid);
     $other_sub_queue = reset($other_sub_queue);
     $other_libraries = _kultur_calendar_get_libraries($other_sub_queue);
-    $other  = kultur_calendar_get_day_other_libraries_events($_GET['date'], $did, $other_libraries, $timezone);
+    $other = kultur_calendar_get_day_other_libraries_events($_GET['date'], $did, $other_libraries, $timezone);
     if ($other) {
       $events[$date][] = $other;
     }
