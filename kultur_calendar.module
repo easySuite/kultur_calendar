@@ -64,14 +64,18 @@ function kultur_calendar($form, &$form_state) {
 
   $did = kultur_calendar_get_domain_id();
 
+  $libraries_queue = nodequeue_load_queue_by_name('kultur_libraries');
+  $libraries_sub_queue = nodequeue_load_subqueues_by_queue($libraries_queue->qid);
+  $libraries_sub_queue = reset($libraries_sub_queue);
+  $libraries = _kultur_calendar_get_libraries($libraries_sub_queue);
+
   $query = db_select('node', 'n');
-  $query->join('domain_access', 'da', 'n.nid = da.nid');
   $query->fields('n', array('nid', 'title'));
   $query->condition('n.type', 'ding_library');
   $query->condition('n.status', '1');
-  $query->condition('da.gid', $did);
-  $query->condition('da.realm', 'domain_id');
+  $query->condition('n.nid', $libraries, 'IN');
   $libraries = $query->execute()->fetchAllKeyed();
+  $libraries['other'] = t('Other');
 
   $form['libraries'] = array(
     '#type' => 'checkboxes',
@@ -131,8 +135,10 @@ function kultur_calendar($form, &$form_state) {
  */
 function kultur_calendar_events_get() {
   $events = array();
-  if (!empty($_POST['start']) && !empty($_POST['end'])) {
-    $events = kultur_calendar_get_events($_POST['start'], $_POST['end']);
+  $start = $_GET['start'];
+  $end = $_GET['end'];
+  if (!empty($start) && !empty($end)) {
+    $events = kultur_calendar_get_events($start, $end);
   }
 
   return $events;
@@ -148,22 +154,36 @@ function kultur_calendar_events_get() {
  */
 function kultur_calendar_events_day_load() {
   $events = array();
-  if (!empty($_POST['date'])) {
-    $date = date_create_from_format('Y-m-d', $_POST['date']);
+  if (!empty($_GET['date'])) {
+    $date = date_create_from_format('Y-m-d', $_GET['date']);
     $date = $date->getTimestamp();
     $date = format_date($date, 'ding_event_lists_date');
 
     $did = kultur_calendar_get_domain_id();
     $timezone = date_default_timezone_get();
 
-    $events[$date] = kultur_calendar_get_day_libraries_events($_POST['date'], $did, $timezone);
+    $libraries_queue = nodequeue_load_queue_by_name('kultur_libraries');
+    $libraries_sub_queue = nodequeue_load_subqueues_by_queue($libraries_queue->qid);
+    $libraries_sub_queue = reset($libraries_sub_queue);
+    $libraries = _kultur_calendar_get_libraries($libraries_sub_queue);
+    $events[$date] = kultur_calendar_get_day_libraries_events($_GET['date'], $did, $libraries, $libraries_sub_queue->sqid, $timezone);
+
+    $other_queue = nodequeue_load_queue_by_name('other_kultur_libraries');
+    $other_sub_queue = nodequeue_load_subqueues_by_queue($other_queue->qid);
+    $other_sub_queue = reset($other_sub_queue);
+    $other_libraries = _kultur_calendar_get_libraries($other_sub_queue);
+    $other  = kultur_calendar_get_day_other_libraries_events($_GET['date'], $did, $other_libraries, $timezone);
+    if ($other) {
+      $events[$date][] = $other;
+    }
+
     foreach ($events[$date] as &$event) {
-      $day = kultur_calendar_get_day_events($_POST['date'], $event->lid, $did, $timezone);
+      $day = kultur_calendar_get_day_events($_GET['date'], $event->lid, $did, $timezone);
 
       _kultur_calendar_format_event_time($day);
 
       $event->info = $day;
-      $event->date = $_POST['date'];
+      $event->date = $_GET['date'];
     }
   }
 

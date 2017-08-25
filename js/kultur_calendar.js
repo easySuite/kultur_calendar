@@ -17,7 +17,7 @@
         events: function (start, end, timezone, callback) {
           $.ajax({
             url: `/kalender/events`,
-            type: 'POST',
+            type: 'GET',
             dataType: 'json',
             data: {
               start: start.unix(),
@@ -27,22 +27,27 @@
               let events = [];
               Object.keys(doc).forEach(function (date) {
                 for (let value of doc[date]) {
-                  let day = {
-                    title: value.title,
-                    url: `/node/${value.lid}`,
-                    start: date,
-                    lid: value.lid,
-                    amount: value.amount,
-                  };
-                  events.push(day);
+                  if (value.amount > 0) {
+                    let url = (value.lid !== 'other') ? `/node/${value.lid}` : `/arrangementer-liste/${date}`;
+                    let day = {
+                      title: value.title,
+                      url: url,
+                      start: date,
+                      lid: value.lid,
+                      amount: value.amount,
+                      weight: value.weight,
+                    };
+                    events.push(day);
+                  }
                 }
                 // Add other link for pop-up.
-                if (doc[date].length > 0) {
+                if (doc[date].length > 1) {
                   events.push({
                     start: date,
                     title: Drupal.t('See other'),
                     url: `/arrangementer-liste/${date}`,
-                    date: date
+                    date: date,
+                    weight: 9, // This link should be last in the list of events.
                   });
                 }
               });
@@ -51,6 +56,7 @@
             }
           });
         },
+        eventOrder: ["weight"],
         eventRender: function (event, element, view) {
           if (view.name === 'month' && event.lid) {
             // Hide all items before render.
@@ -88,49 +94,54 @@
             element.addClass('other-info');
           }
         },
-        // Open pop-up on day click.
-        dayClick: function (date, jsEvent, view) {
-          $.ajax({
-            url: '/kalender/day',
-            dataType: 'json',
-            type: 'POST',
-            data: {
-              date: date.format()
-            },
-            success: function (data) {
-                if (data[Object.keys(data)[0]].length > 0) {
-                let $day = $('#kultur_calendar-day');
-                let date = new Date(this.data.split('=')[1]);
-                positionDayPopup(data[Object.keys(data)[0]][0].date);
+      });
 
-                let body = `
-                  <div class="kultur_calendar-title">
-                    ${Object.keys(data)[0]}
-                    <div class="day-number">${date.getDate()}</div>
-                  </div>
-                  <div class="kultur_calendar-body">
-                  ${data[Object.keys(data)[0]].map(event =>
-                  `<div class="row">
-                      <div class="amount">${event.amount}</div>
-                      <div class="title">${event.title}:</div>
-                      <div class="event">
+      // Open popup on on day hover.
+      $('#kultur-calendar').find('td.fc-day').on('mouseenter', function(e) {
+        let date = $(this).data('date');
+        $.ajax({
+          url: '/kalender/day',
+          dataType: 'json',
+          type: 'GET',
+          data: {
+            date: date
+          },
+          success: function (data) {
+            if (data[Object.keys(data)[0]].length > 0) {
+              let $day = $('#kultur_calendar-day');
+              let date = Object.keys(data)[0].split(' ')[1].split('.')[0];
+              positionDayPopup(data[Object.keys(data)[0]][0].date);
+
+              let body = `
+                <div class="kultur_calendar-title">
+                  ${Object.keys(data)[0]}
+                  <div class="day-number">${date}</div>
+                </div>
+                <div class="kultur_calendar-body">
+                ${data[Object.keys(data)[0]].map(event =>
+                `<div class="row">
+                    <div class="amount">${event.amount}</div>
+                    <div class="title">${(event.lid === 'other') ? `<a href="/arrangementer-liste/${event.date}" class="other">${event.title}</a>` : `${event.title}:`}</div>
+                    ${(event.lid != 'other') ?
+                  `<div class="event">
                         <a href="/node/${event.info.eid}">${trimAndShorten(event.info.title)}</a>
                         <div class="time">
-                          ${[event.info.start, event.info.end].filter(function(value) {return value;}).join(' - ')}
+                          ${[event.info.start, event.info.end].filter(function (value) {
+                    return value;
+                  }).join(' - ')}
                         </div>
-                      </div>
-                    </div>`
-                ).join('')}
-                  </div>`;
-                $day.find('.loading').replaceWith(body);
-
-              }
+                      </div>` : ``}
+                  </div>`
+              ).join('')}
+                </div>`;
+              $day.find('.loading').replaceWith(body);
             }
-          });
-
-          return false;
-        }
+          }
+        });
+      }).on('mouseleave', function (e) {
+        $('#kultur_calendar-day').addClass('hidden');
       });
+
 
       // Show/Hide events based on the selected library.
       $('#kultur-libraries', context).on('change', 'input:checkbox', function() {
