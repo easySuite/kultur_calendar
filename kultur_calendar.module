@@ -70,12 +70,17 @@ function kultur_calendar($form, &$form_state) {
   $libraries = _kultur_calendar_get_libraries($libraries_sub_queue);
 
   $query = db_select('node', 'n');
-  $query->fields('n', ['nid', 'title']);
-  $query->condition('n.type', 'ding_library');
-  $query->condition('n.status', '1');
-  $query->condition('n.nid', $libraries, 'IN');
+
+  $query->fields('n', ['nid', 'title'])
+    ->condition('n.type', 'ding_library')
+    ->condition('n.status', '1')
+    ->condition('n.nid', $libraries, 'IN');
+  $query->leftJoin('nodequeue_nodes', 'nn', 'n.nid = nn.nid');
+  $query->condition('nn.sqid', $libraries_sub_queue->sqid)
+    ->orderBy('nn.position');
+
   $libraries = $query->execute()->fetchAllKeyed();
-  $libraries['other'] = t('Other');
+  $libraries['other'] = t('Other actors');
 
   $form['libraries'] = [
     '#type' => 'checkboxes',

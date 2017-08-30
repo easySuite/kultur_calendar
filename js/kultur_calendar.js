@@ -3,7 +3,7 @@
 
   Drupal.behaviors.kultur_calendar = {
     attach: function (context) {
-      $('#kultur_calendar').fullCalendar({
+      $('#kultur_calendar', context).fullCalendar({
         locale: $('html').attr('lang'),
         header: {
           left: '',
@@ -77,6 +77,7 @@
             element.removeClass('hidden');
           }
           element.attr('data-lid', event.lid);
+          element.attr('data-date', event.start._i);
 
           let today = new Date().setUTCHours(0, 0, 0, 0) / 1000;
           let eventDay = event.start.unix();
@@ -95,54 +96,54 @@
           }
         },
       });
-
       // Open popup on on day hover.
-      $('#kultur-calendar').find('td.fc-day').on('mouseenter', function(e) {
+      $('#kultur_calendar').on('mouseenter','.fc-day', function(e) {
         let date = $(this).data('date');
-        $.ajax({
-          url: '/kalender/day',
-          dataType: 'json',
-          type: 'GET',
-          data: {
-            date: date
-          },
-          success: function (data) {
-            if (data[Object.keys(data)[0]].length > 0) {
-              let $day = $('#kultur_calendar-day');
-              let date = Object.keys(data)[0].split(' ')[1].split('.')[0];
-              positionDayPopup(data[Object.keys(data)[0]][0].date);
+        if ($(".fc-content-skeleton").find(`.kultur-event[data-date='${date}']`).length > 0) {
+          positionDayPopup(date);
+          $.ajax({
+            url: '/kalender/day',
+            dataType: 'json',
+            type: 'GET',
+            data: {
+              date: date
+            },
+            success: function (data) {
+              if (data[Object.keys(data)[0]] && data[Object.keys(data)[0]].length > 0) {
+                let $day = $('#kultur_calendar-day');
+                let date = Object.keys(data)[0].split(' ')[1].split('.')[0];
 
-              let body = `
+                let body = `
                 <div class="kultur_calendar-title">
                   ${Object.keys(data)[0]}
                   <div class="day-number">${date}</div>
                 </div>
                 <div class="kultur_calendar-body">
                 ${data[Object.keys(data)[0]].map(event =>
-                `<div class="row">
+                  `<div class="row">
                     <div class="amount">${event.amount}</div>
                     <div class="title">${(event.lid === 'other') ? `<a href="/arrangementer-liste/${event.date}" class="other">${event.title}</a>` : `${event.title}:`}</div>
                     ${(event.lid != 'other') ?
-                  `<div class="event">
+                    `<div class="event">
                         <a href="/node/${event.info.eid}">${trimAndShorten(event.info.title)}</a>
                         <div class="time">
                           ${[event.info.start, event.info.end].filter(function (value) {
-                    return value;
-                  }).join(' - ')}
+                      return value;
+                    }).join(' - ')}
                         </div>
                       </div>` : ``}
                   </div>`
-              ).join('')}
+                ).join('')}
                 </div>`;
-              $day.find('.loading').replaceWith(body);
+                $day.find('.loading').replaceWith(body);
+              }
             }
-          }
-        });
-      }).on('mouseleave', function (e) {
-        $('#kultur_calendar-day').addClass('hidden');
+          });
+        }
       });
-
-
+      $('#kultur_calendar-day').on('mouseleave', function() {
+        $(this).addClass('hidden');
+      });
       // Show/Hide events based on the selected library.
       $('#kultur-libraries', context).on('change', 'input:checkbox', function() {
         let lid = $(this).val();

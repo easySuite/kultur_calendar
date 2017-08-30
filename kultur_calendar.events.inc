@@ -47,10 +47,14 @@ function kultur_calendar_get_events($start, $end) {
   return $daily_events;
 }
 
+/*
+ * Get list of libraries ids based on sub-queue id.
+ */
 function _kultur_calendar_get_libraries($sub_queue) {
   $libraries = db_select('nodequeue_nodes', 'nn')
     ->fields('nn', ['nid'])
     ->condition('nn.sqid', $sub_queue->sqid)
+    ->orderBy('nn.position', 'ASC')
     ->execute()
     ->fetchCol();
 
@@ -174,7 +178,7 @@ function kultur_calendar_get_day_other_libraries_events($date, $did, $libraries,
   $amount = reset($result)->amount;
   if ($amount) {
     $object = new stdClass();
-    $object->title = t('Other');
+    $object->title = t('Other actors');
     $object->lid = 'other';
     $object->amount = $amount;
     $object->weight = 8; // See other link has weight 9.
