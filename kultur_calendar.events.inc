@@ -17,8 +17,8 @@
  *   Set of all events in a given month of the year.
  */
 function kultur_calendar_get_events($start, $end) {
-  $daily_events = array();
-  $daily_events_res = array();
+  $daily_events = [];
+  $daily_events_res = [];
 
   $did = kultur_calendar_get_domain_id();
   $timezone = date_default_timezone_get();
@@ -47,11 +47,16 @@ function kultur_calendar_get_events($start, $end) {
   return $daily_events;
 }
 
+/*
+ * Get list of libraries ids based on sub-queue id.
+ */
 function _kultur_calendar_get_libraries($sub_queue) {
   $libraries = db_select('nodequeue_nodes', 'nn')
-    ->fields('nn', array('nid'))
+    ->fields('nn', ['nid'])
     ->condition('nn.sqid', $sub_queue->sqid)
-    ->execute()->fetchCol();
+    ->orderBy('nn.position', 'ASC')
+    ->execute()
+    ->fetchCol();
 
   return $libraries;
 }
@@ -109,9 +114,16 @@ function kultur_calendar_get_day_libraries_events($date, $did, $libraries, $sqid
     ->condition('n.type', 'ding_library')
     ->condition('library.nid', $libraries, 'IN')
     ->condition('nn.sqid', $sqid)
-    ->where(':date >= DATE(CONVERT_TZ(field_ding_event_date_value, \'UTC\', :timezone))', array('date' => $date, ':timezone' => $timezone))
-    ->where(':date <= DATE(CONVERT_TZ(field_ding_event_date_value2, \'UTC\', :timezone))', array('date' => $date, ':timezone' => $timezone))
-  ;
+    ->where(':date >= DATE(CONVERT_TZ(field_ding_event_date_value, \'UTC\', :timezone))', [
+      'date' => $date,
+      ':timezone' => $timezone,
+    ]
+    )
+    ->where(':date <= DATE(CONVERT_TZ(field_ding_event_date_value2, \'UTC\', :timezone))', [
+      'date' => $date,
+      ':timezone' => $timezone,
+    ]
+    );
   $query->groupBy('library.title');
 
   if ($did) {
@@ -147,9 +159,16 @@ function kultur_calendar_get_day_other_libraries_events($date, $did, $libraries,
   $query->condition('event.type', 'ding_event')
     ->condition('og.gid', $libraries, 'IN')
     ->condition('event.status', 1)
-    ->where(':date >= DATE(CONVERT_TZ(field_ding_event_date_value, \'UTC\', :timezone))', array('date' => $date, ':timezone' => $timezone))
-    ->where(':date <= DATE(CONVERT_TZ(field_ding_event_date_value2, \'UTC\', :timezone))', array('date' => $date, ':timezone' => $timezone))
-  ;
+    ->where(':date >= DATE(CONVERT_TZ(field_ding_event_date_value, \'UTC\', :timezone))', [
+      'date' => $date,
+      ':timezone' => $timezone,
+    ]
+    )
+    ->where(':date <= DATE(CONVERT_TZ(field_ding_event_date_value2, \'UTC\', :timezone))', [
+      'date' => $date,
+      ':timezone' => $timezone,
+    ]
+    );
   if ($did) {
     $query->leftJoin('domain_access', 'da', 'event.nid = da.nid');
     $query->condition('da.gid', $did);
@@ -159,7 +178,7 @@ function kultur_calendar_get_day_other_libraries_events($date, $did, $libraries,
   $amount = reset($result)->amount;
   if ($amount) {
     $object = new stdClass();
-    $object->title = t('Other');
+    $object->title = t('Other actors');
     $object->lid = 'other';
     $object->amount = $amount;
     $object->weight = 8; // See other link has weight 9.
@@ -191,13 +210,21 @@ function kultur_calendar_get_day_events($date, $lid, $did, $timezone = 'Europe/B
   $query->leftJoin('og_membership', 'og', 'events.nid = og.etid');
   $query->addField('events', 'title', 'title');
   $query->addField('events', 'nid', 'eid');
-  $query->addExpression('CONVERT_TZ(events_date.field_ding_event_date_value, \'UTC\', :timezone)', 'start', array(':timezone' => $timezone));
-  $query->addExpression('CONVERT_TZ(events_date.field_ding_event_date_value2, \'UTC\',  :timezone)', 'end', array(':timezone' => $timezone));
+  $query->addExpression('CONVERT_TZ(events_date.field_ding_event_date_value, \'UTC\', :timezone)', 'start', [':timezone' => $timezone]);
+  $query->addExpression('CONVERT_TZ(events_date.field_ding_event_date_value2, \'UTC\',  :timezone)', 'end', [':timezone' => $timezone]);
   $query->condition('events.type', 'ding_event')
     ->condition('og.gid', $lid)
     ->condition('events.status', 1)
-    ->where(':date >= DATE(CONVERT_TZ(events_date.field_ding_event_date_value, \'UTC\', :timezone))', array('date' => $date, ':timezone' => $timezone))
-    ->where(':date <= DATE(CONVERT_TZ(events_date.field_ding_event_date_value2, \'UTC\', :timezone))', array('date' => $date, ':timezone' => $timezone));
+    ->where(':date >= DATE(CONVERT_TZ(events_date.field_ding_event_date_value, \'UTC\', :timezone))', [
+      'date' => $date,
+      ':timezone' => $timezone,
+    ]
+    )
+    ->where(':date <= DATE(CONVERT_TZ(events_date.field_ding_event_date_value2, \'UTC\', :timezone))', [
+      'date' => $date,
+      ':timezone' => $timezone,
+    ]
+    );
   $query->range(0, 1);
 
   if ($did) {

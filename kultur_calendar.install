@@ -15,10 +15,10 @@ function kultur_calendar_install() {
  * Implements hook_uninstall().
  */
 function kultur_calendar_uninstall() {
-  $queues = array(
+  $queues = [
     'kultur_libraries' => 'KulturØen Libraries',
     'other_kultur_libraries' => 'Other actors',
-  );
+  ];
 
   foreach ($queues as $name => $title) {
     $queue = nodequeue_load_queue_by_name($name);
@@ -37,10 +37,10 @@ function kultur_calendar_update_7001() {
  * Create nodequeues to group libraries.
  */
 function kultur_calendar_create_nodequeues() {
-  $queues = array(
+  $queues = [
     'kultur_libraries' => 'KulturØen Libraries',
     'other_kultur_libraries' => 'Other actors',
-  );
+  ];
 
   foreach ($queues as $name => $title) {
     $nodequeue = new stdClass();
