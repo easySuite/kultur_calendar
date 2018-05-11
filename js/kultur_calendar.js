@@ -26,9 +26,10 @@
             success: function (doc) {
               let events = [];
               Object.keys(doc).forEach(function (date) {
+                var link_date = moment(date).format('DD-MM-YYYY');
                 for (let value of doc[date]) {
                   if (value.amount > 0) {
-                    let url = (value.lid !== 'other') ? `/node/${value.lid}` : `/arrangementer-liste/${date}`;
+                    let url = (value.lid !== 'other') ? `/node/${value.lid}` : `/arrangementer?date[value][date]=${link_date}&field_ding_event_date_value_1[value][date]=${link_date}`;
                     let day = {
                       title: value.title,
                       url: url,
@@ -45,7 +46,7 @@
                   events.push({
                     start: date,
                     title: Drupal.t('See other'),
-                    url: `/arrangementer-liste/${date}`,
+                    url: `/arrangementer?date[value][date]=${link_date}&field_ding_event_date_value_1[value][date]=${link_date}`,
                     date: date,
                     weight: 9, // This link should be last in the list of events.
                   });
@@ -95,6 +96,9 @@
             element.addClass('other-info');
           }
         },
+        dayRender: function (date, cell) {
+          cell.attr('data-cell_index', cell[0].cellIndex + 1);
+        }
       });
       // Open popup on on day hover.
       $('#kultur_calendar').on('mouseenter','.fc-day', function(e) {
@@ -111,6 +115,9 @@
             success: function (data) {
               if (data[Object.keys(data)[0]] && data[Object.keys(data)[0]].length > 0) {
                 let $day = $('#kultur_calendar-day');
+                let day_cell = $(".fc-day");
+                $day.css('width', day_cell[0].clientWidth * 2 - 1 + "px"); // 1 - border
+
                 let date = Object.keys(data)[0].split(' ')[1].split('.')[0];
 
                 let body = `
@@ -122,7 +129,7 @@
                 ${data[Object.keys(data)[0]].map(event =>
                   `<div class="row">
                     <div class="amount">${event.amount}</div>
-                    <div class="title">${(event.lid === 'other') ? `<a href="/arrangementer-liste/${event.date}" class="other">${event.title}</a>` : `${event.title}:`}</div>
+                    <div class="title">${(event.lid === 'other') ? `<a href="/arrangementer?date[value][date]=${moment(event.date).format('DD-MM-YYYY')}&field_ding_event_date_value_1[value][date]=${moment(event.date).format('DD-MM-YYYY')}" class="other">${event.title}</a>` : `${event.title}:`}</div>
                     ${(event.lid != 'other') ?
                     `<div class="event">
                         <a href="/node/${event.info.eid}">${trimAndShorten(event.info.title)}</a>
@@ -187,26 +194,33 @@
         let day = $(".fc-bg").find(`td[data-date='${date}']`)[0];
         let row = $(day).closest('.fc-row.fc-widget-content')[0];
         let nextRow = $(row).next()[0];
-        let height = $(row).height();
+        let height = $(row).height() - 4;
         let aditionalCorrections = getAditionalCorrections();
-
         let top = 0;
-        let left = ($(day).offset().left - aditionalCorrections.left > $(day).width()) ?
-          $(day).offset().left - $(day).width() - aditionalCorrections.left :
-          $(day).offset().left - aditionalCorrections.left;
+        let right = 0;
+
+        let page_table = $('.fc-view-container');
+        let day_cell = $(day);
+        let left = (day_cell[0].clientWidth * ($(day).data('cell_index') - 1)) + page_table[0].offsetLeft + $(day).data('cell_index') + 1;
+
+        if ($(day).data('cell_index') === 6 || $(day).data('cell_index') === 7) {
+          right = page_table[0].offsetLeft + 1;
+          left = '';
+        }
 
         if (nextRow) {
           height += $(nextRow).height();
-          top = $(nextRow).offset().top - $(row).height() - aditionalCorrections.top;
+          top = $(nextRow).offset().top - $(row).height() - aditionalCorrections.top + 2;
         } else {
           let prevRow = $(row).prev()[0];
           height += $(prevRow).height();
 
-          top = $(prevRow).offset().top - aditionalCorrections.top;
+          top = $(prevRow).offset().top - aditionalCorrections.top + 4;
         }
         $('#kultur_calendar-day').css(
           {
             left: left,
+            right: right,
             top: top,
             height: height
           }
