@@ -64,12 +64,12 @@
             element.addClass('hidden');
 
             // Process title before render.
-            let amount = `<span class="event-amount">${event.amount}</span>`;
+            let amount = `<span class="event-amount">(${event.amount})</span>`;
             // Trim title.
             let cutTitleLength = event.title.indexOf('-') !== -1 ?
               event.title.indexOf('-') :
               event.title.length;
-            let title = amount + event.title.substr(0, cutTitleLength);
+            let title = event.title.substr(0, cutTitleLength) + amount;
             element.find('span.fc-title').html(title);
           }
 
@@ -128,8 +128,8 @@
                 <div class="kultur_calendar-body">
                 ${data[Object.keys(data)[0]].map(event =>
                   `<div class="row">
-                    <div class="amount">${event.amount}</div>
                     <div class="title">${(event.lid === 'other') ? `<a href="/arrangementer?date[value][date]=${moment(event.date).format('DD-MM-YYYY')}&field_ding_event_date_value_1[value][date]=${moment(event.date).format('DD-MM-YYYY')}" class="other">${event.title}</a>` : `${event.title}:`}</div>
+                    <div class="amount">${event.amount}</div>
                     ${(event.lid != 'other') ?
                     `<div class="event">
                         <a href="/node/${event.info.eid}">${trimAndShorten(event.info.title)}</a>
