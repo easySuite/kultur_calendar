@@ -116,6 +116,7 @@
               if (data[Object.keys(data)[0]] && data[Object.keys(data)[0]].length > 0) {
                 let $day = $('#kultur_calendar-day');
                 let day_cell = $(".fc-day");
+                let raw_date = data[Object.keys(data)[0]][0].date;
                 $day.css('width', day_cell[0].clientWidth * 2 - 1 + "px"); // 1 - border
 
                 let date = Object.keys(data)[0].split(' ')[1].split('.')[0];
@@ -141,6 +142,11 @@
                       </div>` : ``}
                   </div>`
                 ).join('')}
+                  <a href="/arrangementer?date[value][date]=${moment(raw_date).format('DD-MM-YYYY')}&field_ding_event_date_value_1[value][date]=${moment(raw_date).format('DD-MM-YYYY')}">
+                    <div class="fc-content">
+                      <span class="fc-title">${Drupal.t('See other')}</span>
+                    </div>
+                  </a>
                 </div>`;
                 $day.find('.loading').replaceWith(body);
               }
