@@ -26,10 +26,12 @@
             success: function (doc) {
               let events = [];
               Object.keys(doc).forEach(function (date) {
-                var link_date = moment(date).format('DD-MM-YYYY');
+                let link_date = moment(date).format('DD-MM-YYYY');
                 for (let value of doc[date]) {
                   if (value.amount > 0) {
                     let url = (value.lid !== 'other') ? `/node/${value.lid}` : `/arrangementer?date[value][date]=${link_date}&field_ding_event_date_value_1[value][date]=${link_date}`;
+                    url = `${url}&${mapTargetLink(value.libraries)}`;
+
                     let day = {
                       title: value.title,
                       url: url,
@@ -129,7 +131,7 @@
                 <div class="kultur_calendar-body">
                 ${data[Object.keys(data)[0]].map(event =>
                   `<div class="row">
-                    <div class="title">${(event.lid === 'other') ? `<a href="/arrangementer?date[value][date]=${moment(event.date).format('DD-MM-YYYY')}&field_ding_event_date_value_1[value][date]=${moment(event.date).format('DD-MM-YYYY')}" class="other">${event.title}</a>` : `${event.title}:`}</div>
+                    <div class="title">${(event.lid === 'other') ? `<a href="/arrangementer?date[value][date]=${moment(event.date).format('DD-MM-YYYY')}&field_ding_event_date_value_1[value][date]=${moment(event.date).format('DD-MM-YYYY')}&${mapTargetLink(event.libraries)}" class="other">${event.title}</a>` : `${event.title}:`}</div>
                     <div class="amount">${event.amount}</div>
                     ${(event.lid != 'other') ?
                     `<div class="event">
@@ -193,6 +195,20 @@
         else {
           return string;
         }
+      }
+
+      // Map target ids to append to the url.
+      function mapTargetLink(libraries) {
+        let target = [];
+
+        if (libraries) {
+          libraries.map(function (value) {
+            target.push(`og_group_ref_target_id_entityreference_filter[]=${value}`);
+          });
+          return target.join('&');
+        }
+
+        return '';
       }
 
       // Manipulate Day Popup on the calendar view.

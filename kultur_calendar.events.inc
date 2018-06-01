@@ -175,10 +175,16 @@ function kultur_calendar_get_day_other_libraries_events($date, $did, $libraries,
     $query->leftJoin('domain_access', 'da', 'event.nid = da.nid');
     $query->condition('da.gid', $did);
   }
-  $executed = $query->execute();
-  $result = $executed->fetchAll();
+  try {
+    $executed = $query->execute();
+    $result = $executed->fetchAll();
 
-  $amount = reset($result)->amount;
+    $amount = reset($result)->amount;
+  }
+  catch (Exception $e) {
+    $amount = array();
+  }
+
   if ($amount) {
     $object = new stdClass();
     $object->title = t('Other actors');
@@ -186,6 +192,7 @@ function kultur_calendar_get_day_other_libraries_events($date, $did, $libraries,
     $object->amount = $amount;
     // See other link has weight 9.
     $object->weight = 8;
+    $object->libraries = $libraries;
 
     return $object;
   }
