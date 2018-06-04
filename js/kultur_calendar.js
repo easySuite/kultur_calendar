@@ -3,8 +3,13 @@
 
   Drupal.behaviors.kultur_calendar = {
     attach: function (context) {
+      let view = 'month';
+      if ($(window).width() < 768) {
+        view = 'listWeek';
+      }
       $('#kultur_calendar', context).fullCalendar({
         locale: $('html').attr('lang'),
+        defaultView: view,
         header: {
           left: '',
           center: 'prev title next',
@@ -61,37 +66,42 @@
         },
         eventOrder: ["weight"],
         eventRender: function (event, element, view) {
-          if (view.name === 'month' && event.lid) {
-            // Hide all items before render.
-            element.addClass('hidden');
+          // Hide all items before render.
+          element.addClass('hidden');
 
-            // Process title before render.
-            let amount = `<span class="event-amount">(${event.amount})</span>`;
-            // Trim title.
-            let cutTitleLength = event.title.indexOf('-') !== -1 ?
+          // Process title before render.
+          let amount = `<span class="event-amount">(${event.amount})</span>`;
+          // Trim title.
+          let cutTitleLength = event.title.indexOf('-') !== -1 ?
               event.title.indexOf('-') :
               event.title.length;
-            let title = event.title.substr(0, cutTitleLength) + amount;
+          let title = event.title.substr(0, cutTitleLength) + amount;
+
+          if (view.name === 'month' && event.lid) {
             element.find('span.fc-title').html(title);
-          }
 
-          element.addClass('kultur-event');
-          if ($('#kultur-libraries').find('input[type=checkbox][value=' + event.lid + ']').is(':checked')) {
-            element.removeClass('hidden');
-          }
-          element.attr('data-lid', event.lid);
-          element.attr('data-date', event.start._i);
+            element.addClass('kultur-event');
+            if ($('#kultur-libraries').find('input[type=checkbox][value=' + event.lid + ']').is(':checked')) {
+              element.removeClass('hidden');
+            }
+            element.attr('data-lid', event.lid);
+            element.attr('data-date', event.start._i);
 
-          let today = new Date().setUTCHours(0, 0, 0, 0) / 1000;
-          let eventDay = event.start.unix();
-          if (today < eventDay) {
-            element.addClass('kultur-future-event');
-          }
-          else if (today > eventDay) {
-            element.addClass('kultur-past-event');
-          }
-          else {
-            element.addClass('kultur-today-event');
+            let today = new Date().setUTCHours(0, 0, 0, 0) / 1000;
+            let eventDay = event.start.unix();
+            if (today < eventDay) {
+              element.addClass('kultur-future-event');
+            }
+            else if (today > eventDay) {
+              element.addClass('kultur-past-event');
+            }
+            else {
+              element.addClass('kultur-today-event');
+            }
+          } else if (view.name === 'listWeek' && event.lid) {
+            element.find('.fc-list-item-title').html(title);
+
+
           }
 
           if (!event.lid) {
