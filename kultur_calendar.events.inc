@@ -64,16 +64,19 @@ function _kultur_calendar_get_libraries($sub_queue) {
  * Get kultur domain id.
  */
 function kultur_calendar_get_domain_id() {
-  $did = &drupal_static(__FUNCTION__);
-  if (empty($did)) {
-    $domains = domain_domains();
-    $did = FALSE;
-    foreach ($domains as $domain) {
-      if (strpos($domain['machine_name'], 'kultur') !== FALSE) {
-        $did = $domain['domain_id'];
-      }
-      else {
-        $did = $domain['domain_id'];
+  $did = FALSE;
+  if (module_exists('domain')) {
+    $did = &drupal_static(__FUNCTION__);
+    if (empty($did)) {
+      $domains = domain_domains();
+      $did = FALSE;
+      foreach ($domains as $domain) {
+        if (strpos($domain['machine_name'], 'kultur') !== FALSE) {
+          $did = $domain['domain_id'];
+        }
+        else {
+          $did = $domain['domain_id'];
+        }
       }
     }
   }
@@ -86,7 +89,7 @@ function kultur_calendar_get_domain_id() {
  *
  * @param string $date
  *   Date of the event.
- * @param int $did
+ * @param int|bool $did
  *   Domain grant access id.
  * @param array $libraries
  *   Set of libraries to be used for selection.
@@ -128,7 +131,7 @@ function kultur_calendar_get_day_libraries_events($date, $did, $libraries, $sqid
     );
   $query->groupBy('library.title');
 
-  if ($did) {
+  if (!empty($did)) {
     $query->leftJoin('domain_access', 'da', 'event.nid = da.nid');
     $query->condition('da.gid', $did);
   }
